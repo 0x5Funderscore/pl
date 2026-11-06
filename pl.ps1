@@ -315,7 +315,7 @@ function Write-Visualisation {
 $Shuffle = -not $NoShuffle
 
 if ($Playlist -eq $null) {
-  Write-Error "No playlist specified."
+  Write-Host "No playlist specified." -ForegroundColor Red
   exit 1
 }
 
@@ -348,9 +348,9 @@ $Playlist = $Playlist | ForEach-Object {
   try {
     if (-not (Test-Path $PlaylistPath -PathType Leaf)) { $PlaylistPath = Join-Path $PlaylistFolder $PlaylistPath }
     if (-not (Test-Path $PlaylistPath -PathType Leaf)) { $PlaylistPath = $PlaylistPath + ".*" }
-    $null = Get-Content $PlaylistPath # dummy read to ensure access
+    $null = Get-Content $PlaylistPath -ErrorAction Stop # dummy read to ensure access
   } catch {
-    Write-Error ("Could not find playlist: " + $OPlaylistPath)
+    Write-Host ("Could not find playlist: " + $OPlaylistPath) -ForegroundColor Red
     exit 1
   }
 
@@ -362,7 +362,7 @@ function Get-Songs {
 
   $Songs = [System.Collections.Generic.List[String]]::new()
   try {
-    ((Get-Content -Path $Playlist) -split "`n") | ForEach-Object {
+    ((Get-Content -Path $Playlist -ErrorAction Stop) -split "`n") | ForEach-Object {
 
       $P = ($_ -split "(?<!\|.*)#")[0].Trim()
       $Pp = $P -split "\|"
@@ -380,9 +380,9 @@ function Get-Songs {
 
         $(
           if ($P -match '^".*"$') {
-            Get-ChildItem -LiteralPath ($P.Trim('"'))
+            Get-ChildItem -LiteralPath ($P.Trim('"')) -ErrorAction SilentlyContinue
           } else {
-            Get-ChildItem -Path $P -Recurse
+            Get-ChildItem -Path $P -Recurse -ErrorAction SilentlyContinue
           }
         ) | Select-Object -ExpandProperty "FullName" | ForEach-Object {
           if (Test-Path -LiteralPath $_ -PathType Leaf) {
@@ -400,7 +400,7 @@ function Get-Songs {
     $_ | Out-File -FilePath "$env:USERPROFILE\script_error.log" -Append
   }
   if ($Songs.Count -eq 0) {
-    Write-Error "No song paths found in playlist file."
+    Write-Host "No song paths found in playlist file." -ForegroundColor Red
     exit 1
   }
   return [string[]]$Songs.ToArray()
