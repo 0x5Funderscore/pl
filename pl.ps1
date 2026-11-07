@@ -796,7 +796,7 @@ try {
 
     }
 
-    Get-Job | ForEach-Object { Stop-Job $_; Wait-Job $_; Remove-Job $_ }
+    $null = Get-Job | ForEach-Object { Stop-Job $_; Wait-Job $_; Remove-Job $_ }
 
     if ($Wait) {
       Write-Host "$($CSI)96;3mPress Tab to continue..."
@@ -825,7 +825,7 @@ try {
   $_ | Out-File -FilePath "$env:USERPROFILE\script_error.log" -Append
   exit 1
 } finally {
-  Get-Job | ForEach-Object { Stop-Job $_; Wait-Job $_; Remove-Job $_ }
+  $null = Get-Job | ForEach-Object { Stop-Job $_; Wait-Job $_; Remove-Job $_ }
   Stop-Song
   Write-Host "$($CSI)?25h" -NoNewline
 }
